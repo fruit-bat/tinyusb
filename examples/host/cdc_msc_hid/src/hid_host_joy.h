@@ -79,12 +79,22 @@ typedef struct {
   uint32_t buttons;
 } tusb_hid_simple_joysick_values_t;
 
+typedef union TU_ATTR_PACKED
+{
+  uint32_t combined;
+  struct TU_ATTR_PACKED
+  {
+    uint8_t instance     :8;
+    uint8_t dev_addr     :8;
+    uint8_t report_id    :8;
+    uint8_t in_use       :8;
+  } elements;
+} tusb_hid_simple_joysick_key_t;
+
 // Simple joystick definitions and values
 typedef struct {
-  uint8_t hid_instance;
-  uint8_t report_id;
+  tusb_hid_simple_joysick_key_t key;
   uint8_t report_length; // requied report length in bytes
-  bool active;
   bool has_values;
   tusb_hid_simple_axis_t axis_x1;
   tusb_hid_simple_axis_t axis_y1;
@@ -126,26 +136,27 @@ void tuh_hid_joystick_process_usages(
   tuh_hid_rip_state_t *pstate,
   tuh_hid_joystick_data_t* jdata,
   uint32_t bitpos,
-  uint8_t hid_instance
+  uint8_t dev_addr,
+  uint8_t instance
 );
 
 // Parse a HID report description for a joystick
-uint8_t tuh_hid_joystick_parse_report_descriptor(uint8_t const* desc_report, uint16_t desc_len, uint8_t hid_instance);
+uint8_t tuh_hid_joystick_parse_report_descriptor(uint8_t const* desc_report, uint16_t desc_len, uint8_t dev_addr, uint8_t instance);
 
 // Fetch a previously allocated simple joystick
-tusb_hid_simple_joysick_t* tuh_hid_get_simple_joystick(uint8_t hid_instance, uint8_t report_id);
+tusb_hid_simple_joysick_t* tuh_hid_get_simple_joystick(uint8_t dev_addr, uint8_t instance, uint8_t report_id);
 
 // Free a previously allocated simple joystick
-void tuh_hid_free_simple_joysticks_for_instance(uint8_t hid_instance);
+void tuh_hid_free_simple_joysticks_for_instance(uint8_t dev_addr, uint8_t instance);
 
 // Free all previously allocated simple joysticks
 void tuh_hid_free_simple_joysticks();
 
 // Allocate a new simple joystick
-tusb_hid_simple_joysick_t* tuh_hid_allocate_simple_joystick(uint8_t hid_instance, uint8_t report_id);
+tusb_hid_simple_joysick_t* tuh_hid_allocate_simple_joystick(uint8_t dev_addr, uint8_t instance, uint8_t report_id);
 
 // If it exists, return an exisiting simple joystick, else allocate a new one
-tusb_hid_simple_joysick_t* tuh_hid_obtain_simple_joystick(uint8_t hid_instance, uint8_t report_id);
+tusb_hid_simple_joysick_t* tuh_hid_obtain_simple_joystick(uint8_t dev_addr, uint8_t instance, uint8_t report_id);
 
 // Process a HID report
 // The report pointer should be advanced beyond the report ID byte.
@@ -156,7 +167,7 @@ void tusb_hid_simple_joysick_process_report(tusb_hid_simple_joysick_t* simple_jo
 // Send an axis and button report to stdout
 //
 // e.g.
-//  hid=  0, report_id=  0, x1=   0, y1=   0, x2= 127, y2= 127, hat=F, buttons=0008
+//  dev_addr=  1, instance=  0, report_id=  0, x1= 127, y1= 127, x2= 127, y2= 127, hat=F, buttons=0000
 //
 void tusb_hid_print_simple_joysick_report(tusb_hid_simple_joysick_t* simple_joystick);
 
