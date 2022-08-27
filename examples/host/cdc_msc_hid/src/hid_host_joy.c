@@ -68,6 +68,16 @@ void tuh_hid_free_simple_joysticks_for_instance(uint8_t dev_addr, uint8_t instan
   }
 }
 
+static void tuh_hid_joystick_init_axis(
+  tusb_hid_simple_axis_t* simple_axis)
+{
+  simple_axis->start = 0;
+  simple_axis->length = 0;
+  simple_axis->flags.is_signed = true;
+  simple_axis->logical_min = -1;
+  simple_axis->logical_max = 1;
+}
+
 tusb_hid_simple_joysick_t* tuh_hid_allocate_simple_joystick(uint8_t dev_addr, uint8_t instance, uint8_t report_id) {
   for(uint8_t i = 0; i < HID_MAX_JOYSTICKS; ++i) {
     tusb_hid_simple_joysick_t* simple_joystick = &hid_simple_joysicks[i];
@@ -77,6 +87,10 @@ tusb_hid_simple_joysick_t* tuh_hid_allocate_simple_joystick(uint8_t dev_addr, ui
       simple_joystick->key.elements.instance = instance;
       simple_joystick->key.elements.report_id = report_id;
       simple_joystick->key.elements.dev_addr = dev_addr;
+      tuh_hid_joystick_init_axis(&simple_joystick->axis_x1);
+      tuh_hid_joystick_init_axis(&simple_joystick->axis_x2);
+      tuh_hid_joystick_init_axis(&simple_joystick->axis_y1);
+      tuh_hid_joystick_init_axis(&simple_joystick->axis_y2);
       return simple_joystick;
     }
   }
@@ -162,7 +176,7 @@ void tuh_hid_joystick_process_usages(
 
   // Update the report length in bytes
   simple_joystick->report_length = (uint8_t)((bitpos + (jdata->report_size * jdata->report_count) + 7) >> 3);
-  
+
   // Naive, assumes buttons are defined in a range
   if (jdata->usage_is_range) {
     if (jdata->usage_page == HID_USAGE_PAGE_BUTTON) {
