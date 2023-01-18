@@ -167,7 +167,7 @@ void tuh_hid_free_simple_joysticks(void);
 // Allocate a new simple joystick
 tusb_hid_simple_joysick_t* tuh_hid_allocate_simple_joystick(uint8_t dev_addr, uint8_t instance, uint8_t report_id);
 
-// If it exists, return an exisiting simple joystick, else allocate a new one
+// If it exists, return an existing simple joystick, else allocate a new one
 tusb_hid_simple_joysick_t* tuh_hid_obtain_simple_joystick(uint8_t dev_addr, uint8_t instance, uint8_t report_id);
 
 // Process a HID report
