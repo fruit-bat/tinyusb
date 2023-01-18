@@ -9,6 +9,9 @@ INC += \
 EXAMPLE_SOURCE = \
   src/cdc_app.c \
   src/hid_app.c \
+  src/hid_host_utils.c \
+  src/hid_host_info.c \
+  src/hid_host_joy.c \
   src/main.c \
   src/msc_app.c \
 
