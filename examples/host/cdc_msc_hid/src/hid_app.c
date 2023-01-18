@@ -190,7 +190,7 @@ void tuh_hid_umount_cb(uint8_t dev_addr, uint8_t instance)
 {
   printf("HID device address = %d, instance = %d is unmounted\r\n", dev_addr, instance);
   
-  // Invoke unmount functions adn free up host info structure 
+  // Invoke unmount functions and free up host info structure
   tuh_hid_free_info(dev_addr, instance);
 }
 

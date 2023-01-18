@@ -27,7 +27,7 @@
  * up to 32x Buttons (but have to be defined in one range in the HID description)
  * 
  * Applications will still need to allow mapping of axis and buttons to 
- * particlar functions.
+ * particular functions.
  * 
  * There are many ways a HID report can describe a joystick and this code
  * only copes with a few of them. 
@@ -106,7 +106,7 @@ typedef union TU_ATTR_PACKED
 // Simple joystick definitions and values
 typedef struct {
   tusb_hid_simple_joysick_key_t key;
-  uint8_t report_length; // requied report length in bytes
+  uint8_t report_length; // required report length in bytes
   bool has_values;
   tusb_hid_simple_axis_t axis_x1;
   tusb_hid_simple_axis_t axis_y1;
