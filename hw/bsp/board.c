@@ -1,4 +1,4 @@
-/* 
+/*
  * The MIT License (MIT)
  *
  * Copyright (c) 2018, hathach (tinyusb.org)
@@ -77,8 +77,10 @@ void board_led_task(void)
 //--------------------------------------------------------------------+
 // newlib read()/write() retarget
 //--------------------------------------------------------------------+
-
-#if defined(__MSP430__) || defined(__RX__)
+#ifdef __ICCARM__
+  #define sys_write   __write
+  #define sys_read    __read
+#elif defined(__MSP430__) || defined(__RX__)
   #define sys_write   write
   #define sys_read    read
 #else

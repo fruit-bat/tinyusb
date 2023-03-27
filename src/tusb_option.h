@@ -27,13 +27,10 @@
 #ifndef _TUSB_OPTION_H_
 #define _TUSB_OPTION_H_
 
-// To avoid GCC compiler warnings when -pedantic option is used (strict ISO C)
-typedef int make_iso_compilers_happy;
-
 #include "common/tusb_compiler.h"
 
 #define TUSB_VERSION_MAJOR     0
-#define TUSB_VERSION_MINOR     14
+#define TUSB_VERSION_MINOR     15
 #define TUSB_VERSION_REVISION  0
 #define TUSB_VERSION_STRING    TU_STRING(TUSB_VERSION_MAJOR) "." TU_STRING(TUSB_VERSION_MINOR) "." TU_STRING(TUSB_VERSION_REVISION)
 
@@ -120,8 +117,11 @@ typedef int make_iso_compilers_happy;
 #define OPT_MCU_RP2040           1100 ///< Raspberry Pi RP2040
 
 // NXP Kinetis
-#define OPT_MCU_MKL25ZXX         1200 ///< NXP MKL25Zxx
-#define OPT_MCU_K32L2BXX         1201 ///< NXP K32L2Bxx
+#define OPT_MCU_KINETIS_KL       1200 ///< NXP KL series
+#define OPT_MCU_KINETIS_K32      1201 ///< NXP K32 series
+
+#define OPT_MCU_MKL25ZXX         1200 ///< Alias to KL (obsolete)
+#define OPT_MCU_K32L2BXX         1201 ///< Alias to K32 (obsolete)
 
 // Silabs
 #define OPT_MCU_EFM32GG          1300 ///< Silabs EFM32GG
@@ -130,6 +130,8 @@ typedef int make_iso_compilers_happy;
 #define OPT_MCU_RX63X            1400 ///< Renesas RX63N/631
 #define OPT_MCU_RX65X            1401 ///< Renesas RX65N/RX651
 #define OPT_MCU_RX72N            1402 ///< Renesas RX72N
+#define OPT_MCU_RAXXX            1403 ///< Renesas RAxxx families
+
 
 // Mind Motion
 #define OPT_MCU_MM32F327X        1500 ///< Mind Motion MM32F327
@@ -287,12 +289,15 @@ typedef int make_iso_compilers_happy;
   #define CFG_TUSB_DEBUG 0
 #endif
 
-// place data in accessible RAM for usb controller
+// TODO MEM_SECTION can be different for host and device controller
+// should use CFG_TUD_MEM_SECTION, CFG_TUH_MEM_SECTION
 #ifndef CFG_TUSB_MEM_SECTION
   #define CFG_TUSB_MEM_SECTION
 #endif
 
 // alignment requirement of buffer used for endpoint transferring
+// TODO MEM_ALIGN can be different for host and device controller
+// should use CFG_TUD_MEM_ALIGN, CFG_TUH_MEM_ALIGN
 #ifndef CFG_TUSB_MEM_ALIGN
   #define CFG_TUSB_MEM_ALIGN      TU_ATTR_ALIGNED(4)
 #endif
@@ -309,6 +314,26 @@ typedef int make_iso_compilers_happy;
 //--------------------------------------------------------------------
 // Device Options (Default)
 //--------------------------------------------------------------------
+
+// Attribute to place data in accessible RAM for device controller
+// default to CFG_TUSB_MEM_SECTION for backward-compatible
+#ifndef CFG_TUD_MEM_SECTION
+  #ifdef CFG_TUSB_MEM_SECTION
+    #define CFG_TUD_MEM_SECTION   CFG_TUSB_MEM_SECTION
+  #else
+    #define CFG_TUD_MEM_SECTION
+  #endif
+#endif
+
+// Attribute to align memory for device controller
+// default to CFG_TUSB_MEM_ALIGN for backward-compatible
+#ifndef CFG_TUD_MEM_ALIGN
+  #ifdef CFG_TUSB_MEM_ALIGN
+    #define CFG_TUD_MEM_ALIGN   CFG_TUSB_MEM_ALIGN
+  #else
+    #define CFG_TUD_MEM_ALIGN   TU_ATTR_ALIGNED(4)
+  #endif
+#endif
 
 #ifndef CFG_TUD_ENDPOINT0_SIZE
   #define CFG_TUD_ENDPOINT0_SIZE  64
@@ -388,6 +413,21 @@ typedef int make_iso_compilers_happy;
   #endif
 #endif // CFG_TUH_ENABLED
 
+// Attribute to place data in accessible RAM for host controller
+// default to CFG_TUSB_MEM_SECTION for backward-compatible
+#ifndef CFG_TUH_MEM_SECTION
+  #ifdef CFG_TUSB_MEM_SECTION
+    #define CFG_TUH_MEM_SECTION   CFG_TUSB_MEM_SECTION
+  #else
+    #define CFG_TUH_MEM_SECTION
+  #endif
+#endif
+
+// Attribute to align memory for host controller
+#ifndef CFG_TUH_MEM_ALIGN
+  #define CFG_TUH_MEM_ALIGN   TU_ATTR_ALIGNED(4)
+#endif
+
 //------------- CLASS -------------//
 
 #ifndef CFG_TUH_HUB
@@ -434,6 +474,9 @@ typedef int make_iso_compilers_happy;
 #if CFG_TUD_ENDPOINT0_SIZE > 64
   #error Control Endpoint Max Packet Size cannot be larger than 64
 #endif
+
+// To avoid GCC compiler warnings when -pedantic option is used (strict ISO C)
+typedef int make_iso_compilers_happy;
 
 #endif /* _TUSB_OPTION_H_ */
 

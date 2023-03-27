@@ -56,9 +56,6 @@ static_assert(PICO_USB_HOST_INTERRUPT_ENDPOINTS <= USB_MAX_ENDPOINTS, "");
 static struct hw_endpoint ep_pool[1 + PICO_USB_HOST_INTERRUPT_ENDPOINTS];
 #define epx (ep_pool[0])
 
-#define usb_hw_set   hw_set_alias(usb_hw)
-#define usb_hw_clear hw_clear_alias(usb_hw)
-
 // Flags we set by default in sie_ctrl (we add other bits on top)
 enum {
   SIE_CTRL_BASE = USB_SIE_CTRL_SOF_EN_BITS      | USB_SIE_CTRL_KEEP_ALIVE_EN_BITS |
@@ -449,7 +446,7 @@ tusb_speed_t hcd_port_speed_get(uint8_t rhport)
       return TUSB_SPEED_FULL;
     default:
       panic("Invalid speed\n");
-      return TUSB_SPEED_INVALID;
+      // return TUSB_SPEED_INVALID;
   }
 }
 
@@ -616,7 +613,7 @@ bool hcd_edpt_clear_stall(uint8_t dev_addr, uint8_t ep_addr)
   (void) ep_addr;
 
   panic("hcd_clear_stall");
-  return true;
+  // return true;
 }
 
 #endif
