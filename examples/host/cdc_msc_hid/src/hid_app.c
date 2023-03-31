@@ -44,6 +44,61 @@ static void process_kbd_report(hid_keyboard_report_t const *report);
 static void process_mouse_report(hid_mouse_report_t const * report);
 static void process_generic_report(uint8_t dev_addr, uint8_t instance, uint8_t const* report, uint16_t len);
 
+
+static inline bool get_fake_hid_report(uint8_t dev_addr, uint8_t instance)
+{
+  uint16_t vid, pid;
+  tuh_vid_pid_get(dev_addr, &vid, &pid);
+
+  printf("HID Checking for fake report vid=%04X pid=%04X\n", vid, pid);
+
+  // check if device is Sony DualShock 4
+  /*
+  return ( (vid == 0x054c && (pid == 0x09cc || pid == 0x05c4)) // Sony DualShock4
+           || (vid == 0x0f0d && pid == 0x005e)                 // Hori FC4
+           || (vid == 0x0f0d && pid == 0x00ee)                 // Hori PS4 Mini (PS4-099U)
+           || (vid == 0x1f4f && pid == 0x1002)                 // ASW GG xrd controller
+         );
+*/
+  // sixaxis vid=054C pid=0268
+  if (vid == 0x054C && pid == 0x0268) {
+    printf("HID DualShock 3 detected\n");
+
+    uint8_t rep[4] = {0x42, 0x0c, 0x00, 0x00};
+    //tuh_hid_send_report(dev_addr, instance, 0xf4, rep, sizeof(rep));
+    tuh_hid_set_report(dev_addr, instance, 0xf4, 3, &rep, 4);
+/*
+    tusb_control_request_t const request =
+    {
+      .bmRequestType_bit =
+      {
+        .recipient = TUSB_REQ_RCPT_INTERFACE,
+        .type      = TUSB_REQ_TYPE_CLASS,
+        .direction = TUSB_DIR_OUT
+      },
+      .bRequest = 9, // HID request set report
+      .wValue   = 0,
+      .wIndex   = instance,
+      .wLength  = 4
+    };
+
+    tuh_xfer_t xfer =
+    {
+      .daddr       = dev_addr,
+      .ep_addr     = 0,
+      .setup       = &request,
+      .buffer      = rep,
+      .complete_cb = NULL,
+      .user_data    = 0
+    };
+    TU_ASSERT(tuh_control_xfer(&xfer));
+    */   
+  }
+
+  return false;
+}
+
+
 void hid_app_task(void)
 {
   // nothing to do
@@ -127,6 +182,7 @@ void tuh_hid_mount_cb(uint8_t dev_addr, uint8_t instance, uint8_t const* desc_re
 
   printf("HID Interface Protocol = %s\r\n", protocol_str[itf_protocol]);
 
+
   // By default host stack will use activate boot protocol on supported interface.
   // Therefore for this simple example, we only need to parse generic report descriptor (with built-in parser)
   if ( itf_protocol == HID_ITF_PROTOCOL_NONE )
@@ -176,14 +232,24 @@ void tuh_hid_mount_cb(uint8_t dev_addr, uint8_t instance, uint8_t const* desc_re
       }
     }  
   }
+get_hid_itf(dev_addr, instance);
 
-  // request to receive report
-  // tuh_hid_report_received_cb() will be invoked when report is available
-  if ( !tuh_hid_receive_report(dev_addr, instance) )
-  {
-    printf("Error: cannot request to receive report\r\n");
-  }
+  get_fake_hid_report(dev_addr, instance);
+
 }
+
+void tuh_hid_set_report_complete_cb(uint8_t dev_addr, uint8_t idx, uint8_t report_id, uint8_t report_type, uint16_t len) {
+   printf("MY set_report_complete %d %d %d\n", report_id, report_type, len);
+
+    // request to receive report
+    // tuh_hid_report_received_cb() will be invoked when report is available
+    printf("REQUESTED REPORT\n");
+    if ( !tuh_hid_receive_report(dev_addr, idx) )
+    {
+      printf("Error: cannot request to receive report\r\n");
+    }
+}
+
 
 // Invoked when device with hid interface is un-mounted
 void tuh_hid_umount_cb(uint8_t dev_addr, uint8_t instance)
@@ -197,6 +263,7 @@ void tuh_hid_umount_cb(uint8_t dev_addr, uint8_t instance)
 // Invoked when received report from device via interrupt endpoint
 void tuh_hid_report_received_cb(uint8_t dev_addr, uint8_t instance, uint8_t const* report, uint16_t len)
 {
+  printf("GOT A REPORT\n");
   uint8_t const itf_protocol = tuh_hid_interface_protocol(dev_addr, instance);
 
   switch (itf_protocol)

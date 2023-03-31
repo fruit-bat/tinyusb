@@ -32,7 +32,10 @@
 #include "host/usbh_classdriver.h"
 
 #include "hid_host.h"
-
+#undef TU_LOG2
+#undef TU_LOG1
+#define TU_LOG2 printf
+#define TU_LOG1 printf
 //--------------------------------------------------------------------+
 // MACRO CONSTANT TYPEDEF
 //--------------------------------------------------------------------+
@@ -285,7 +288,7 @@ bool tuh_hid_set_report(uint8_t daddr, uint8_t idx, uint8_t report_id, uint8_t r
   tuh_xfer_t xfer =
   {
     .daddr       = daddr,
-    .ep_addr     = 0,
+    .ep_addr     = 1,
     .setup       = &request,
     .buffer      = report,
     .complete_cb = set_report_complete,
