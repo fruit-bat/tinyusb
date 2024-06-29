@@ -545,6 +545,14 @@ bool hidh_set_config(uint8_t daddr, uint8_t itf_num)
   return true;
 }
 
+// fruit-bat
+// ---------
+// This is a HACK as I want my mouse wheel to work.
+// If there is a better way to do this please tell me.
+#ifndef HID_PROTOCOL_DEFAULT
+#define HID_PROTOCOL_BOOT
+#endif
+
 static void process_set_config(tuh_xfer_t* xfer)
 {
   // Stall is a valid response for SET_IDLE, sometime SET_PROTOCOL as well
@@ -575,7 +583,7 @@ static void process_set_config(tuh_xfer_t* xfer)
     break;
 
     case CONFIG_SET_PROTOCOL:
-      _hidh_set_protocol(daddr, p_hid->itf_num, HID_PROTOCOL_BOOT, process_set_config, CONFIG_GET_REPORT_DESC);
+      _hidh_set_protocol(daddr, p_hid->itf_num, HID_PROTOCOL_DEFAULT, process_set_config, CONFIG_GET_REPORT_DESC);
     break;
 
     case CONFIG_GET_REPORT_DESC:
