@@ -550,7 +550,7 @@ bool hidh_set_config(uint8_t daddr, uint8_t itf_num)
 // This is a HACK as I want my mouse wheel to work.
 // If there is a better way to do this please tell me.
 #ifndef HID_PROTOCOL_DEFAULT
-#define HID_PROTOCOL_BOOT
+#define HID_PROTOCOL_DEFAULT HID_PROTOCOL_BOOT
 #endif
 
 static void process_set_config(tuh_xfer_t* xfer)
