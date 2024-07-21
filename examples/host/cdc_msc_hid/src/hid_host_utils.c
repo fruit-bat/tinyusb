@@ -28,22 +28,21 @@
 
 uint32_t tuh_hid_report_bits_u32(uint8_t const* report, uint16_t start, uint16_t length)
 {
-  const int16_t bit_offset_start = start & 7;
-  const int16_t l = length + bit_offset_start;
+  const uint16_t bit_offset_start = start & 7;
+  const uint16_t l = length + bit_offset_start;
   const uint8_t *p = report + (start >> 3);
   uint32_t acc = ((uint32_t)*p++) >> bit_offset_start;
   for(uint16_t i = 1; (i << 3) < l; ++i) {
     acc |= ((uint32_t)*p++) << ((i << 3) - bit_offset_start);
   }
-  const uint32_t lp0 = ((uint32_t)1) << (length - 1);
-  const uint32_t lp1 = lp0 << 1;
-  return acc & (lp1 - 1);
+  const uint32_t m = (((uint32_t)1) << length) - 1;
+  return acc & m;
 }
 
 int32_t tuh_hid_report_bits_i32(uint8_t const* report, uint16_t start, uint16_t length)
 {
-  const int16_t bit_offset_start = start & 7;
-  const int16_t l = length + bit_offset_start;
+  const uint16_t bit_offset_start = start & 7;
+  const uint16_t l = length + bit_offset_start;
   const uint8_t *p = report + (start >> 3);
   uint32_t acc = ((uint32_t)*p++) >> bit_offset_start;
   for(uint16_t i = 1; (i << 3) < l; ++i) {
@@ -52,7 +51,7 @@ int32_t tuh_hid_report_bits_i32(uint8_t const* report, uint16_t start, uint16_t 
   const uint32_t lp0 = ((uint32_t)1) << (length - 1);
   const uint32_t lp1 = lp0 << 1;
   // Mask or sign extend
-  return acc & lp0 ? acc | -lp1 : acc & (lp1 - 1);
+  return (int32_t)(acc & lp0 ? acc | -lp1 : acc & (lp1 - 1));
 }
 
 // Helper to get some bytes from a HID report as an unsigned 32 bit number
@@ -79,7 +78,7 @@ int32_t tuh_hid_report_bytes_i32(uint8_t const* report, uint16_t start, uint16_t
   const uint32_t lp0 = ((uint32_t)1) << ((length << 3) - 1);
   const uint32_t lp1 = lp0 << 1;
   // sign extend
-  return acc & lp0 ? acc | -lp1 : acc;  
+  return (int32_t)(acc & lp0 ? acc | -lp1 : acc);  
 }
 
 // Helper to get a value from a HID report

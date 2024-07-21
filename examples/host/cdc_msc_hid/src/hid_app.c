@@ -74,14 +74,14 @@ void handle_mouse_report(tusb_hid_host_info_t* info, const uint8_t* report, uint
 void handle_joystick_report(tusb_hid_host_info_t* info, const uint8_t* report, uint8_t report_length, uint8_t report_id)
 { 
   TU_LOG1("HID receive joystick report\r\n");
-  tusb_hid_simple_joysick_t* simple_joystick = tuh_hid_get_simple_joystick(
+  tusb_hid_simple_joystick_t* simple_joystick = tuh_hid_get_simple_joystick(
     info->key.elements.dev_addr, 
     info->key.elements.instance, 
     report_id);
     
   if (simple_joystick != NULL) {
-    tusb_hid_simple_joysick_process_report(simple_joystick, report, report_length);
-    tusb_hid_print_simple_joysick_report(simple_joystick);
+    tusb_hid_simple_joystick_process_report(simple_joystick, report, report_length);
+    tusb_hid_print_simple_joystick_report(simple_joystick);
   }
 }
 
@@ -348,5 +348,6 @@ static void process_generic_report(uint8_t dev_addr, uint8_t instance, uint8_t c
     len--;       
   }
   
-  info->handler(info, report, len, rpt_id);
+  // TODO check if the length should be 16 bits
+  info->handler(info, report, (uint8_t)len, rpt_id);
 }

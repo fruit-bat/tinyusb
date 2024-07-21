@@ -12,12 +12,18 @@ family_initialize_project(${PROJECT} ${CMAKE_CURRENT_LIST_DIR})
 
 add_executable(${PROJECT})
 
+target_compile_definitions(${PROJECT} PRIVATE
+	HID_PROTOCOL_DEFAULT=HID_PROTOCOL_REPORT
+)
+
 # Example source
 target_sources(${PROJECT} PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/src/cdc_app.c
         ${CMAKE_CURRENT_SOURCE_DIR}/src/hid_app.c
         ${CMAKE_CURRENT_SOURCE_DIR}/src/hid_host_utils.c
         ${CMAKE_CURRENT_SOURCE_DIR}/src/hid_host_info.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/hid_host_common.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/hid_host_mouse.c
         ${CMAKE_CURRENT_SOURCE_DIR}/src/hid_host_joy.c
         ${CMAKE_CURRENT_SOURCE_DIR}/src/main.c
         ${CMAKE_CURRENT_SOURCE_DIR}/src/msc_app.c

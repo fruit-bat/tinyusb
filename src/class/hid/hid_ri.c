@@ -29,7 +29,7 @@
 
 uint8_t tuh_hid_ri_short_data_length(const uint8_t *ri) {
   // 0 -> 0, 1 -> 1, 2 -> 2, 3 -> 4
-  return (1 << (*ri & 3)) >> 1;
+  return (uint8_t)((1 << (*ri & 3)) >> 1);
 }
 
 uint8_t tuh_hid_ri_short_type(const uint8_t *ri) {
@@ -66,7 +66,7 @@ int32_t tuh_hid_ri_short_data32(const uint8_t *ri) {
   for(uint8_t i = 0; i < 4; ++i) {
     if (i < l) {
       uint32_t b = *ri++;
-      d |= b << (i << 3);
+      d |= (int32_t)(b << (i << 3));
       negative = ((b >> 7) == 1);
     }
     else if (negative) {
@@ -100,16 +100,16 @@ int16_t tuh_hid_ri_size(const uint8_t *ri, uint16_t l) {
     uint16_t ll = tuh_hid_ri_long_data_length(ri);
     uint16_t tl = sl + ll;
     if (l < tl) return HID_RI_ERR_MISSING_LONG;
-    return tl;
+    return (int16_t)tl;
   }
   else {
-    return sl;
+    return (int16_t)sl;
   }
 }
 
 void tuh_hid_ri_split_usage(uint32_t eusage, uint16_t *usage, uint16_t *usage_page) {
   *usage = eusage & 0xffff;
-  *usage_page = eusage >> 16;
+  *usage_page = (uint16_t)(eusage >> 16);
 }
 
 #endif

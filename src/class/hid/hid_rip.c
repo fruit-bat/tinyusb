@@ -62,7 +62,7 @@ const uint8_t* tuh_hid_rip_next_item(tuh_hid_rip_state_t *state)
   // Advance to the next report item
   ri += il;
   state->cursor = ri;
-  state->length -= il;
+  state->length -= (uint16_t)il;
   
   // Normal eof
   if (state->length == 0) {
@@ -225,7 +225,7 @@ uint8_t tuh_hid_parse_report_descriptor(tuh_hid_report_info_t* report_info_arr, 
           TU_LOG1("HID report description contains more than the maximum %d reports\r\n", arr_count);
           return report_num;
         }        
-        info->in_len += tuh_hid_rip_report_total_size_bits(&pstate);
+        info->in_len += (uint16_t)tuh_hid_rip_report_total_size_bits(&pstate);
         info->usage = usage;
         info->usage_page = usage_page;
         break;
@@ -235,7 +235,7 @@ uint8_t tuh_hid_parse_report_descriptor(tuh_hid_report_info_t* report_info_arr, 
           TU_LOG1("HID report description contains more than the maximum %d reports\r\n", arr_count);
           return report_num;
         }        
-        info->out_len += tuh_hid_rip_report_total_size_bits(&pstate);
+        info->out_len += (uint16_t)tuh_hid_rip_report_total_size_bits(&pstate);
         info->usage = usage;
         info->usage_page = usage_page;
         break;
