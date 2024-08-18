@@ -29,8 +29,8 @@
 #if (CFG_TUH_ENABLED && CFG_TUH_HID)
 
 #include "host/usbh.h"
-#include "host/usbh_classdriver.h"
-
+//#include "host/usbh_classdriver.h"
+#include "host/usbh_pvt.h"
 #include "hid_host.h"
 
 //--------------------------------------------------------------------+
@@ -404,10 +404,17 @@ bool tuh_hid_send_report(uint8_t daddr, uint8_t idx, uint8_t report_id, const vo
 //--------------------------------------------------------------------+
 // USBH API
 //--------------------------------------------------------------------+
-void hidh_init(void)
+bool hidh_init(void)
 {
   tu_memclr(_hidh_itf, sizeof(_hidh_itf));
+  return true;
 }
+
+bool hidh_deinit(void)
+{
+  return true;
+}
+
 
 bool hidh_xfer_cb(uint8_t daddr, uint8_t ep_addr, xfer_result_t result, uint32_t xferred_bytes)
 {
@@ -545,6 +552,14 @@ bool hidh_set_config(uint8_t daddr, uint8_t itf_num)
   return true;
 }
 
+// fruit-bat
+// ---------
+// This is a HACK as I want my mouse wheel to work.
+// If there is a better way to do this please tell me.
+#ifndef HID_PROTOCOL_DEFAULT
+#define HID_PROTOCOL_DEFAULT HID_PROTOCOL_BOOT
+#endif
+
 static void process_set_config(tuh_xfer_t* xfer)
 {
   // Stall is a valid response for SET_IDLE, sometime SET_PROTOCOL as well
@@ -575,7 +590,7 @@ static void process_set_config(tuh_xfer_t* xfer)
     break;
 
     case CONFIG_SET_PROTOCOL:
-      _hidh_set_protocol(daddr, p_hid->itf_num, HID_PROTOCOL_BOOT, process_set_config, CONFIG_GET_REPORT_DESC);
+      _hidh_set_protocol(daddr, p_hid->itf_num, HID_PROTOCOL_DEFAULT, process_set_config, CONFIG_GET_REPORT_DESC);
     break;
 
     case CONFIG_GET_REPORT_DESC:
@@ -621,7 +636,7 @@ static void config_driver_mount_complete(uint8_t daddr, uint8_t idx, uint8_t con
 //--------------------------------------------------------------------+
 // Report Descriptor Parser
 //--------------------------------------------------------------------+
-
+/*
 uint8_t tuh_hid_parse_report_descriptor(tuh_hid_report_info_t* report_info_arr, uint8_t arr_count, uint8_t const* desc_report, uint16_t desc_len)
 {
   // Report Item 6.2.2.2 USB HID 1.11
@@ -759,5 +774,5 @@ uint8_t tuh_hid_parse_report_descriptor(tuh_hid_report_info_t* report_info_arr, 
 
   return report_num;
 }
-
+*/
 #endif

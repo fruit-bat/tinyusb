@@ -28,6 +28,7 @@
 #define _TUSB_HID_HOST_H_
 
 #include "hid.h"
+#include "hid_rip.h"
 
 #ifdef __cplusplus
  extern "C" {
@@ -45,18 +46,6 @@
 #ifndef CFG_TUH_HID_EPOUT_BUFSIZE
 #define CFG_TUH_HID_EPOUT_BUFSIZE 64
 #endif
-
-
-typedef struct
-{
-  uint8_t  report_id;
-  uint8_t  usage;
-  uint16_t usage_page;
-
-  // TODO still use the endpoint size for now
-//  uint8_t in_len;      // length of IN report
-//  uint8_t out_len;     // length of OUT report
-} tuh_hid_report_info_t;
 
 //--------------------------------------------------------------------+
 // Interface API
@@ -83,10 +72,6 @@ uint8_t tuh_hid_interface_protocol(uint8_t dev_addr, uint8_t idx);
 
 // Check if HID interface is mounted
 bool tuh_hid_mounted(uint8_t dev_addr, uint8_t idx);
-
-// Parse report descriptor into array of report_info struct and return number of reports.
-// For complicated report, application should write its own parser.
-uint8_t tuh_hid_parse_report_descriptor(tuh_hid_report_info_t* reports_info_arr, uint8_t arr_count, uint8_t const* desc_report, uint16_t desc_len) TU_ATTR_UNUSED;
 
 //--------------------------------------------------------------------+
 // Control Endpoint API
@@ -152,7 +137,8 @@ TU_ATTR_WEAK void tuh_hid_set_protocol_complete_cb(uint8_t dev_addr, uint8_t idx
 //--------------------------------------------------------------------+
 // Internal Class Driver API
 //--------------------------------------------------------------------+
-void hidh_init       (void);
+bool hidh_init       (void);
+bool hidh_deinit     (void);
 bool hidh_open       (uint8_t rhport, uint8_t dev_addr, tusb_desc_interface_t const *desc_itf, uint16_t max_len);
 bool hidh_set_config (uint8_t dev_addr, uint8_t itf_num);
 bool hidh_xfer_cb    (uint8_t dev_addr, uint8_t ep_addr, xfer_result_t result, uint32_t xferred_bytes);
