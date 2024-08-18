@@ -1,7 +1,7 @@
 /* Linker script to configure memory regions. */
 
 SEARCH_DIR(.)
-GROUP(-lgcc -lc -lnosys)
+/*GROUP(-lgcc -lc -lnosys) not compatible with clang*/
 
 MEMORY
 {
@@ -29,4 +29,4 @@ SECTIONS
   } > RAM
 } INSERT AFTER .data;
 
-INCLUDE "nrf52_common.ld"
+INCLUDE "nrf_common.ld"

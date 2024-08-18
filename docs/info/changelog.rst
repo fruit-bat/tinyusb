@@ -2,6 +2,214 @@
 Changelog
 *********
 
+0.17.0 (WIP)
+============
+
+General
+-------
+
+- Improved continuous integration: build both cmake and make. Make use of circleci to build arm-clang
+
+
+Controller Driver (DCD & HCD)
+-----------------------------
+
+- WCH CH32
+
+  - Added support for USB OTG/FS and FSDev Driver. Update CH32V307 to allow manual select FS or HS driver.
+  - Fixed various bugs in CH32v307 usbhs driver: endpoint handling and data transfer management.
+
+- Fixed race conditions and other bugs in dcd_nrf5x and other drivers.
+- Implemented hcd abort transfer for Max3421 and rp2040
+- Added DWC2 Test Mode support.
+- stm32 fsdev: ISO EP buffer allocation improvements, implement dcd_edpt_close_all()
+- Added support for STM32G4 and STM32U5 microcontrollers.
+
+Device Stack
+------------
+
+- Added tud_deinit() to deinitialize TinyUSB device stack.
+- Added support for generic SOF callback.
+
+- Audio
+
+  - Add audio_test_freertos & audio_4_channel_mic_freertos
+  - Improved support for Audio Class 2.0 (UAC2) with various bug fixes.
+
+- HID
+
+  - Added missing key codes for keypad
+  - Added HID Lighting and Illumination functionality
+
+- Vendor: Added empty transfers for tud_vendor_n_write()
+- MSC: Added support for SCSI_CMD_PREVENT_ALLOW_MEDIUM_REMOVAL
+
+- CDC
+
+  - Add option to make CDC TX buffer persistent
+  - Add missing capability bit for CDC ACM serial break support
+
+- Net
+
+  - Rewrite of NCM device driver
+  - removed obsolete tud_network_link_state_cb()
+
+- Enhanced CDC class with better handling of large data transmissions.
+- Fixed issues in the HID class for more reliable device enumeration.
+- Video Added support for USB Video Class (UVC) with MJPEG.
+- USBTMC Added notification support
+
+Host Stack
+----------
+
+- Added tuh_deinit() to deinitialize TinyUSB host stack.
+- Added support for new USB mass storage class APIs.
+- Enhanced stability of CDC-ACM devices during enumeration.
+- Improved error handling and retry mechanisms for unstable devices.
+- Added support for multiple interfaces in UVC.
+
+0.16.0
+======
+
+- New controller driver: MAX3421e (usb host shield), rusb2 (Renesas USB2.0), ChipIdea fullspeed
+- New MCUs: MCXn9, nRF5340, STM32: G0, G4, L5, U575, U5A5, RA6m5, CH32F20x
+- Add initial TypeC PowerDelivery support with STM32G4
+- Remove submodules and use python script to manage repo dependencies #1947
+- Add CMake support for most families and boards, move build file from tools/ to examples/build_system
+- Add ETM trace support with JTrace for nrf52840, nrf5340, mcb1857, stm32h743eval, ra6m5
+- [osal] Make it possible to override the osal_task_delay() in osal_none
+- Add CDC+UAC2 composite device example
+- Enhance Hardware-in-the-loop (HIL) testing with more boards: rp2040, stm32l412nucleo, stm32f746disco, lpcxpresso43s67
+
+Controller Driver (DCD & HCD)
+-----------------------------
+
+- Add new ISO endpoint API: dcd_edpt_iso_alloc() and dcd_edpt_iso_activate()
+- Remove legacy driver st/synopsys
+
+- EHCI
+
+  - [iMXRT] Add dache clean/invalidate when memory is in cacheable memory
+  - Fix portsc write issue which cause problem with enumeration
+  - Fix an issue when doing port reset write to portsc
+  - Fix port change detect is not recognized when power on with attached device
+  - Fix xfer failed with disconnected device as stalled
+  - Fix error on EHCI causes xfer error in non-queued qhd which cause memory fault
+  - Un-roll recursive hub removal with usbh queue
+  - Fix issue when removing queue head
+  - Implement hcd_edpt_abort_xfer()
+  - use standard USB complete interrupt instead of custom chipidea async/period interrupt to be more compatible with other ehci implementation
+  - refactor usb complete & error isr processing, merge, update. Fix EHCI QHD reuses QTD on wrong endpoint
+  - Improve bus reset, fix send_setup() not carried out if halted previously
+  - Fix clear qhd halted bit if not caused by STALL protocol to allow for next transfer
+
+- ChipIdea Highspeed
+
+  - Fix control transfer issue when previous status and new setup complete in the same isr frame
+  - [imxrt] Add dcache support for cache region
+
+- ChipIdea Fullspeed
+
+  - Generalize ChipIdea Fullspeed driver for mcxn9 (port 0), kinetis
+
+- nrf
+
+  - Fix DMA race condition with ISO OUT transfer #1946
+  - Add support for nRF5340 with pca10095 board
+
+- Renesas rusb2
+
+  - Generalize rusb2 driver for ra, rx mcus
+  - rework both dcd and hcd for better multiple ports support
+  - Add support for board with HS USB port: ra6m5 port1
+
+- rp2040
+
+  - [dcd] Make writes to SIE_CTRL aware of concurrent access
+  - [hcd] add hcd_frame_number(), hcd_edpt_abort_xfer() for pio-usb host
+
+- stm32 fsdev:
+
+  - Add STM32L5 support
+  - Implement dcd_edpt_iso_alloc() and dcd_edpt_iso_activate()
+
+- OHCI
+
+  - Allows configurable root hub ports, handles SMM mode (Ref OHCI spec 5.1.1.3.3) and Bios mode (Ref OHCI spec 5.1.1.3.4)
+  - Fix FrameIntervalToggle must be toggled after we write the FrameInterval (Ref OHCI Spec 7.3.1)
+  - Wait PowerOnToPowerGoodTime after we enable power of the RH ports (Ref OHCI Spec 7.4.1)
+  - Generate port interrupts for devices already connected during init.
+  - Fix issue when removing queue head
+  - Disable MIE during IRQ processing and clear HccaDoneHead on completion as per OCHI Spec Page 80
+
+Device Stack
+------------
+
+- Add optional hooks tud_event_hook_cb()
+- Audio (UAC2)
+
+  - Fix feedback EP buffer alignment.
+  - Fix encoding, update example
+  - Improve IN transfer
+
+- Bluetooth
+
+  - Add historical EP compatibility for Bluetooth HCI
+
+- CDC
+
+  - Fix line_coding alignment
+  - Fix typo in cdc line coding enum
+
+- MIDI
+
+  - Fix stream_write() always writes system messages to cable 0
+  - Fix incorrect NOTE_ON, NOTE_OFF definitions
+
+- USBTMC: Fix tmc488 bit order
+
+- Vendor: fix read()/write() race condition
+
+- Video (UVC)
+
+  - Add the capability for video class to handle a bulk endpoint in the streaming interface.
+
+Host Stack
+----------
+
+- USBH
+
+  - Add new APIs: tuh_interface_set(), tuh_task_event_ready(), tuh_edpt_abort_xfer(), tuh_rhport_reset_bus(), tuh_rhport_is_active()
+  - Fix issue when device generate multiple attach/detach/attach when plugging in
+  - Prefer application callback over built-in driver on transfer complete event
+  - Correct hcd_edpt_clear_stall() API signature
+  - Separate bus reset delay and contact debouncing delay in enumeration
+  - Support usbh_app_driver_get_cb() for application drivers
+  - Fix usbh enumeration removal race condition
+  - Add optional hooks tuh_event_hook_cb()
+
+- CDC
+
+  - Breaking: change tuh_cdc_itf_get_info() to use tuh_itf_info_t instead of tuh_cdc_info_t
+  - Fix cdc host enumeration issue when device does not support line request
+  - Add support for vendor usb2uart serial: ftdi, cp210x, ch9102f
+  - Improve sync control API e.g  tuh_cdc_set_control_line_state(), tuh_cdc_set_line_coding()
+
+- HID
+
+  - Add new APIs tuh_hid_send_report(), tuh_hid_itf_get_info(), tuh_hid_receive_ready(), tuh_hid_send_ready(), tuh_hid_set_default_protocol()
+  - Change meaning of CFG_TUH_HID to total number of HID interfaces supported. Previously CFG_TUH_HID is max number of interfaces per device which is rather limited and consume more resources than needed.
+
+- HUB
+
+  - Fix handling of empty "status change" interrupt
+  - Fix issue with hub status_change is not aligned
+
+- MSC
+
+  - Fix bug in tuh_msc_ready()
+  - Fix host msc get maxlun not using aligned section memory
+
 0.15.0
 ======
 
@@ -93,7 +301,7 @@ Controller Driver (DCD & HCD)
 
   - CFG_TUD_ENABLED/CFG_TUH_ENABLED, CFG_TUD_MAX_SPEED/CFG_TUH_MAX_SPEED can be used to replace CFG_TUSB_RHPORT0_MODE/CFG_TUSB_RHPORT1_MODE
   - tud_init(rphort), tuh_init(rhport) can be used to init stack on specified roothub port (controller) instead of tusb_init(void)
-- Add dcd/hcd port specific defines TUP_ (stand for tinyusb port-specific)
+- Add dcd/hcd port specific defines `TUP_` (stand for tinyusb port-specific)
 - [dwc2]
 
   - Update to support stm32 h72x, h73x with only 1 otg controller
