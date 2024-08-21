@@ -31,7 +31,7 @@
 #include "hid_rip.h"
 
 #ifdef __cplusplus
- extern "C" {
+extern "C" {
 #endif
 
 //--------------------------------------------------------------------+
@@ -51,7 +51,7 @@
 // Interface API
 //--------------------------------------------------------------------+
 
-// Get the number of mounted HID interfaces of a device
+// Get the total number of mounted HID interfaces of a device
 uint8_t tuh_hid_itf_get_count(uint8_t dev_addr);
 
 // Get all mounted interfaces across devices
@@ -82,25 +82,40 @@ bool tuh_hid_mounted(uint8_t dev_addr, uint8_t idx);
 //       Application can use set_protocol() to switch back to Report protocol.
 uint8_t tuh_hid_get_protocol(uint8_t dev_addr, uint8_t idx);
 
+// Device by default is enumerated in Boot protocol for simplicity. Application
+// can use this to modify the default protocol for next enumeration.
+void tuh_hid_set_default_protocol(uint8_t protocol);
+
 // Set protocol to HID_PROTOCOL_BOOT (0) or HID_PROTOCOL_REPORT (1)
 // This function is only supported by Boot interface (tuh_n_hid_interface_protocol() != NONE)
 bool tuh_hid_set_protocol(uint8_t dev_addr, uint8_t idx, uint8_t protocol);
 
+// Get Report using control endpoint
+// report_type is either Input, Output or Feature, (value from hid_report_type_t)
+bool tuh_hid_get_report(uint8_t dev_addr, uint8_t idx, uint8_t report_id, uint8_t report_type, void* report, uint16_t len);
+
 // Set Report using control endpoint
 // report_type is either Input, Output or Feature, (value from hid_report_type_t)
-bool tuh_hid_set_report(uint8_t dev_addr, uint8_t idx, uint8_t report_id, uint8_t report_type, void* report, uint16_t len);
+bool tuh_hid_set_report(uint8_t dev_addr, uint8_t idx, uint8_t report_id, uint8_t report_type,
+                        void* report, uint16_t len);
 
 //--------------------------------------------------------------------+
 // Interrupt Endpoint API
 //--------------------------------------------------------------------+
 
-// Check if the interface is ready to use
-//bool tuh_n_hid_n_ready(uint8_t dev_addr, uint8_t idx);
+// Check if HID interface is ready to receive report
+bool tuh_hid_receive_ready(uint8_t dev_addr, uint8_t idx);
 
 // Try to receive next report on Interrupt Endpoint. Immediately return
 // - true If succeeded, tuh_hid_report_received_cb() callback will be invoked when report is available
 // - false if failed to queue the transfer e.g endpoint is busy
 bool tuh_hid_receive_report(uint8_t dev_addr, uint8_t idx);
+
+// Abort receiving report on Interrupt Endpoint
+bool tuh_hid_receive_abort(uint8_t dev_addr, uint8_t idx);
+
+// Check if HID interface is ready to send report
+bool tuh_hid_send_ready(uint8_t dev_addr, uint8_t idx);
 
 // Send report using interrupt endpoint
 // If report_id > 0 (composite), it will be sent as 1st byte, then report contents. Otherwise only report content is sent.
@@ -127,6 +142,10 @@ void tuh_hid_report_received_cb(uint8_t dev_addr, uint8_t idx, uint8_t const* re
 // Invoked when sent report to device successfully via interrupt endpoint
 TU_ATTR_WEAK void tuh_hid_report_sent_cb(uint8_t dev_addr, uint8_t idx, uint8_t const* report, uint16_t len);
 
+// Invoked when Get Report to device via either control endpoint
+// len = 0 indicate there is error in the transfer e.g stalled response
+TU_ATTR_WEAK void tuh_hid_get_report_complete_cb(uint8_t dev_addr, uint8_t idx, uint8_t report_id, uint8_t report_type, uint16_t len);
+
 // Invoked when Sent Report to device via either control endpoint
 // len = 0 indicate there is error in the transfer e.g stalled response
 TU_ATTR_WEAK void tuh_hid_set_report_complete_cb(uint8_t dev_addr, uint8_t idx, uint8_t report_id, uint8_t report_type, uint16_t len);
@@ -137,11 +156,12 @@ TU_ATTR_WEAK void tuh_hid_set_protocol_complete_cb(uint8_t dev_addr, uint8_t idx
 //--------------------------------------------------------------------+
 // Internal Class Driver API
 //--------------------------------------------------------------------+
-void hidh_init       (void);
-bool hidh_open       (uint8_t rhport, uint8_t dev_addr, tusb_desc_interface_t const *desc_itf, uint16_t max_len);
-bool hidh_set_config (uint8_t dev_addr, uint8_t itf_num);
-bool hidh_xfer_cb    (uint8_t dev_addr, uint8_t ep_addr, xfer_result_t result, uint32_t xferred_bytes);
-void hidh_close      (uint8_t dev_addr);
+bool hidh_init(void);
+bool hidh_deinit(void);
+bool hidh_open(uint8_t rhport, uint8_t dev_addr, tusb_desc_interface_t const* desc_itf, uint16_t max_len);
+bool hidh_set_config(uint8_t dev_addr, uint8_t itf_num);
+bool hidh_xfer_cb(uint8_t dev_addr, uint8_t ep_addr, xfer_result_t result, uint32_t xferred_bytes);
+void hidh_close(uint8_t dev_addr);
 
 #ifdef __cplusplus
 }
