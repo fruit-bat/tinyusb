@@ -92,7 +92,7 @@ typedef struct
 
 } dcd_data_t;
 
-CFG_TUSB_MEM_SECTION TU_ATTR_ALIGNED(128) static dcd_data_t _dcd;
+CFG_TUD_MEM_SECTION TU_ATTR_ALIGNED(128) static dcd_data_t _dcd;
 
 
 //--------------------------------------------------------------------+
@@ -333,6 +333,11 @@ bool dcd_edpt_open(uint8_t rhport, tusb_desc_endpoint_t const * p_endpoint_desc)
   sie_write(SIE_CMDCODE_ENDPOINT_SET_STATUS + ep_id, 1, 0);    // clear all endpoint status
 
   return true;
+}
+
+void dcd_edpt_close(uint8_t rhport, uint8_t ep_addr) {
+  (void) rhport; (void) ep_addr;
+  // TODO implement dcd_edpt_close()
 }
 
 void dcd_edpt_close_all (uint8_t rhport)
