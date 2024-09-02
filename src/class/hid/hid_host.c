@@ -40,6 +40,14 @@
 
 #define TU_LOG_DRV(...)   TU_LOG(CFG_TUH_HID_LOG_LEVEL, __VA_ARGS__)
 
+// fruit-bat
+// ---------
+// TODO This can probably be removed now!
+// This is a HACK as I want my mouse wheel to work.
+#ifndef HID_PROTOCOL_DEFAULT
+#define HID_PROTOCOL_DEFAULT HID_PROTOCOL_BOOT
+#endif
+
 //--------------------------------------------------------------------+
 // MACRO CONSTANT TYPEDEF
 //--------------------------------------------------------------------+
@@ -67,7 +75,7 @@ typedef struct {
 CFG_TUH_MEM_SECTION
 tu_static hidh_interface_t _hidh_itf[CFG_TUH_HID];
 
-tu_static uint8_t _hidh_default_protocol = HID_PROTOCOL_BOOT;
+tu_static uint8_t _hidh_default_protocol = HID_PROTOCOL_DEFAULT;
 
 //--------------------------------------------------------------------+
 // Helper
@@ -623,9 +631,9 @@ static void config_driver_mount_complete(uint8_t daddr, uint8_t idx, uint8_t con
 //--------------------------------------------------------------------+
 // Report Descriptor Parser
 //--------------------------------------------------------------------+
-
-uint8_t tuh_hid_parse_report_descriptor(tuh_hid_report_info_t* report_info_arr, uint8_t arr_count,
-                                        uint8_t const* desc_report, uint16_t desc_len) {
+/*
+uint8_t tuh_hid_parse_report_descriptor(tuh_hid_report_info_t* report_info_arr, uint8_t arr_count, uint8_t const* desc_report, uint16_t desc_len)
+{
   // Report Item 6.2.2.2 USB HID 1.11
   union TU_ATTR_PACKED {
     uint8_t byte;
@@ -752,5 +760,5 @@ uint8_t tuh_hid_parse_report_descriptor(tuh_hid_report_info_t* report_info_arr, 
 
   return report_num;
 }
-
+*/
 #endif
